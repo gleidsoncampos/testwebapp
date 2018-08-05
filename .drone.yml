@@ -8,3 +8,22 @@ pipeline:
     image: maven:alpine
     commands:
     - mvn --batch-mode clean package
+
+  publish:
+    image: maven:alpine
+    username: ${DOCKER_USERNAME}  # we will inject your dockerhub username using drone secrets. 
+    password: ${DOCKER_PASSWORD} # we will inject your dockerhub password using drone secrets.
+    email: g@g.com
+    repo: gleidsonascampos/testappweb # refer to dockerhub documentation for repo naming conventions
+    tag: latest
+    file: Dockerfile
+    environment:
+      - DOCKER_LAUNCH_DEBUG=true #( usefull for debugging but not necessary )
+    when:
+      branch: [ master ]
+      event: [ push ] # step only triggers on push events
+services:
+  database:
+    image: postgres
+    environment:
+      - DATABASE_URL=postgres://postgres@localhost
