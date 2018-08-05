@@ -10,10 +10,10 @@ pipeline:
     - mvn --batch-mode clean package
 
   publish:
-    image: maven:alpine
+    image: plugins/docker
     username: ${DOCKER_USERNAME}  # we will inject your dockerhub username using drone secrets. 
     password: ${DOCKER_PASSWORD} # we will inject your dockerhub password using drone secrets.
-    email: g@g.com
+    email: gleidsoncampos92@gmail.com
     repo: gleidsonascampos/testappweb # refer to dockerhub documentation for repo naming conventions
     tag: latest
     file: Dockerfile
@@ -22,8 +22,14 @@ pipeline:
     when:
       branch: [ master ]
       event: [ push ] # step only triggers on push events
-services:
-  database:
-    image: postgres
-    environment:
-      - DATABASE_URL=postgres://postgres@localhost
+
+  rancher:
+    image: peloton/drone-rancher
+    url: http://35.231.94.26/
+    access_key: ${RANCHER_ACCESS_KEY}
+    secret_key: ${RANCHER_SECRET_KEY}
+    service: webapp/sample-web-app
+    docker_image: gleidsonascampos/testappweb
+    start_first: true
+    confirm: true
+    timeout: 180
